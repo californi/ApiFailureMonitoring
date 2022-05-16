@@ -3,6 +3,7 @@ import logging
 from pydantic import BaseModel
 import httpx
 import re
+import time
 
 url_host = 'http://failuremanager:5002'
 headers = {'Content-Type': 'application/json',
@@ -11,31 +12,19 @@ headers = {'Content-Type': 'application/json',
 
 def main():
 
-    config.load_incluster_config()
-    v1 = client.CoreV1Api()
-    w = watch.Watch()
+    
+    msg = {"name": "teste 1",
+            "type": "teste 2",
+            "message": "teste 3",
+            "dateevent": "teste4"}
 
-    for event in w.stream(v1.list_event_for_all_namespaces):
-        if event['object'].type == "Warning":
+    while True:  
+        logging.warning(msg)
+        response = httpx.post(f"{url_host}/insufficientcpu",
+                                headers=headers,
+                                json=msg)
 
-            failure = {"name": event['object'].metadata.name,
-                       "type": event['object'].type,
-                       "message": event['object'].message,
-                       "dateevent": str(event['object'].metadata.creation_timestamp)}
-
-            resultNamePod = re.search(
-                'kube-znn', str(failure["name"]), re.IGNORECASE)
-            resultMessageCPU = re.search(
-                'Insufficient cpu', str(failure["message"]), re.IGNORECASE)
-
-            if resultNamePod and resultMessageCPU:
-                print("falha encontrada")
-                logging.warning(failure)
-                response = httpx.post(f"{url_host}/insufficientcpu",
-                                      headers=headers,
-                                      json=failure)
-
-    logging.info("Finished pod stream.")
+        time.sleep(5000)
 
 
 if __name__ == '__main__':

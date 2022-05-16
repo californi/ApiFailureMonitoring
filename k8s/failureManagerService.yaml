@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: failuremanager
+spec:
+  type: LoadBalancer
+  selector:
+    app: failuremanager
+  ports:
+  - port: 5002 # port from application

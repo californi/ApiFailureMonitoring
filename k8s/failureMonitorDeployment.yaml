@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: failuremonitor
+spec:
+  selector:
+    matchLabels:
+      app: failuremonitor
+  template:
+    metadata:
+      labels:
+        app: failuremonitor
+    spec:
+#      priorityClassName: high-priority
+      serviceAccountName: kubow-user
+      containers:
+      - name: failuremonitor
+        image: californibrs/failuremonitor
+        env:
+        - name: PYTHONUNBUFFERED
+          value: "1"
+        resources:
+          requests:
+            memory: "32Mi"
+            cpu: "100m"
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
